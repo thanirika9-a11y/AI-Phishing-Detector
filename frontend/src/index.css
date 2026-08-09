@@ -1349,15 +1349,30 @@ textarea.scanner-text-input {
    MOBILE / RESPONSIVE
    ============================================= */
 @media (max-width: 900px) {
-  .sidebar { display: none; }
-  .main-content { margin-left: 0; padding: 20px 16px 80px; }
-  .dashboard-layout { grid-template-columns: 1fr; }
-  .results-layout { grid-template-columns: 1fr; }
-  .training-layout { grid-template-columns: 1fr; }
-  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-}
+  .sidebar {
+    display: flex;
+    width: 220px;
+    padding: 20px 12px;
+  }
 
-@media (max-width: 480px) {
-  .metrics-grid { grid-template-columns: 1fr; }
-  .hero-title { font-size: 36px; }
+  .main-content {
+    margin-left: 220px;
+    padding: 20px;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .training-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
