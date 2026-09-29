@@ -23,9 +23,8 @@ class ApiConfig {
       if (host == 'localhost' || host == '127.0.0.1') {
         return 'http://localhost:8000';
       }
-      // Production Web (Vercel): Defaults to Render deployed backend URL
-      // If environment variable is set in Vercel or Render, it will use that.
-      return 'https://aegis-phishing-backend.onrender.com';
+      // Production Web (Vercel): Exact live Render deployed backend URL
+      return 'https://ai-phishing-detector-backend.onrender.com';
     }
 
     try {
