@@ -58,6 +58,15 @@ class _MlScreenState extends State<MlScreen> {
     },
   };
 
+  String _getUserId() {
+    try {
+      final appState = Provider.of<AppState>(context, listen: false);
+      return appState.currentUser?['userId']?.toString() ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +75,10 @@ class _MlScreenState extends State<MlScreen> {
 
   Future<void> _checkModelStatus() async {
     try {
-      final res = await http.get(Uri.parse('$_apiBase/api/ml/model-status?category=${widget.category}'));
+      final uid = _getUserId();
+      final res = await http.get(
+        Uri.parse('$_apiBase/api/ml/model-status?category=${widget.category}&user_id=$uid'),
+      );
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (data['dataset_loaded'] == true) {
@@ -88,7 +100,10 @@ class _MlScreenState extends State<MlScreen> {
 
   Future<void> _fetchEda() async {
     try {
-      final res = await http.get(Uri.parse('$_apiBase/api/ml/eda-results?category=${widget.category}'));
+      final uid = _getUserId();
+      final res = await http.get(
+        Uri.parse('$_apiBase/api/ml/eda-results?category=${widget.category}&user_id=$uid'),
+      );
       if (res.statusCode == 200) {
         setState(() {
           _edaData = jsonDecode(res.body);
@@ -126,7 +141,13 @@ class _MlScreenState extends State<MlScreen> {
         return;
       }
 
-      final request = http.MultipartRequest('POST', Uri.parse('$_apiBase/api/ml/upload-dataset?category=${widget.category}'));
+      final uid = _getUserId();
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+          '$_apiBase/api/ml/upload-dataset?category=${widget.category}&user_id=$uid',
+        ),
+      );
       request.files.add(
         http.MultipartFile.fromBytes('file', bytes, filename: file.name),
       );
@@ -167,15 +188,29 @@ class _MlScreenState extends State<MlScreen> {
     });
 
     try {
-      final sampleRes = await http.get(Uri.parse('$_apiBase/api/ml/sample-dataset?category=${widget.category}'));
+      final uid = _getUserId();
+      final sampleRes = await http.get(
+        Uri.parse(
+          '$_apiBase/api/ml/sample-dataset?category=${widget.category}&user_id=$uid',
+        ),
+      );
       if (sampleRes.statusCode != 200) {
         throw Exception('Failed to get sample dataset');
       }
 
       final bytes = sampleRes.bodyBytes;
-      final request = http.MultipartRequest('POST', Uri.parse('$_apiBase/api/ml/upload-dataset?category=${widget.category}'));
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+          '$_apiBase/api/ml/upload-dataset?category=${widget.category}&user_id=$uid',
+        ),
+      );
       request.files.add(
-        http.MultipartFile.fromBytes('file', bytes, filename: 'sample_phishing_dataset.csv'),
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: 'sample_phishing_dataset.csv',
+        ),
       );
 
       final streamedRes = await request.send();
@@ -200,7 +235,8 @@ class _MlScreenState extends State<MlScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Backend error: Please ensure FastAPI backend is running on port 8000. ($e)';
+        _errorMessage =
+            'Backend error: Please ensure FastAPI backend is running on port 8000. ($e)';
       });
     } finally {
       setState(() => _isUploading = false);
@@ -215,7 +251,10 @@ class _MlScreenState extends State<MlScreen> {
     });
 
     try {
-      final res = await http.post(Uri.parse('$_apiBase/api/ml/train?category=${widget.category}'));
+      final uid = _getUserId();
+      final res = await http.post(
+        Uri.parse('$_apiBase/api/ml/train?category=${widget.category}&user_id=$uid'),
+      );
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         setState(() {
@@ -243,7 +282,10 @@ class _MlScreenState extends State<MlScreen> {
 
   Future<void> _fetchAutoAnalysis() async {
     try {
-      final res = await http.get(Uri.parse('$_apiBase/api/ml/auto-analyze?category=${widget.category}'));
+      final uid = _getUserId();
+      final res = await http.get(
+        Uri.parse('$_apiBase/api/ml/auto-analyze?category=${widget.category}&user_id=$uid'),
+      );
       if (res.statusCode == 200) {
         setState(() {
           _analyzeResults = jsonDecode(res.body);
@@ -264,7 +306,8 @@ class _MlScreenState extends State<MlScreen> {
             Row(
               children: [
                 Container(
-                  width: 44, height: 44,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
@@ -272,7 +315,11 @@ class _MlScreenState extends State<MlScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Icon(Icons.psychology_rounded, color: Colors.white, size: 24),
+                    child: Icon(
+                      Icons.psychology_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -283,13 +330,16 @@ class _MlScreenState extends State<MlScreen> {
                       Text(
                         'ML Dataset & Training Lab',
                         style: GoogleFonts.outfit(
-                          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                       Text(
                         'Upload CSV phishing dataset → EDA → Train ML Models',
                         style: GoogleFonts.outfit(
-                          fontSize: 12, color: const Color(0xFF94A3B8),
+                          fontSize: 12,
+                          color: const Color(0xFF94A3B8),
                         ),
                       ),
                     ],
@@ -304,17 +354,26 @@ class _MlScreenState extends State<MlScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFFEF4444).withOpacity(0.15),
-                border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.4)),
+                border: Border.all(
+                  color: const Color(0xFFEF4444).withOpacity(0.4),
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Color(0xFFEF4444), size: 20),
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Color(0xFFEF4444),
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _errorMessage,
-                      style: GoogleFonts.outfit(color: const Color(0xFFEF4444), fontSize: 13),
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFFEF4444),
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -378,12 +437,18 @@ class _MlScreenState extends State<MlScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.folder_open_rounded, color: Color(0xFFEF4444), size: 22),
+              const Icon(
+                Icons.folder_open_rounded,
+                color: Color(0xFFEF4444),
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Step 1: Dataset Upload',
                 style: GoogleFonts.outfit(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -391,7 +456,10 @@ class _MlScreenState extends State<MlScreen> {
           const SizedBox(height: 6),
           Text(
             'Upload open-source CSV / ARFF dataset (PhiUSIIL, UCI, Kaggle, or custom URL list)',
-            style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8)),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           const SizedBox(height: 18),
 
@@ -401,17 +469,26 @@ class _MlScreenState extends State<MlScreen> {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: const Color(0xFF06B6D4).withOpacity(0.1),
-                border: Border.all(color: const Color(0xFF06B6D4).withOpacity(0.25)),
+                border: Border.all(
+                  color: const Color(0xFF06B6D4).withOpacity(0.25),
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.lightbulb_outline_rounded, color: Color(0xFF06B6D4), size: 18),
+                  const Icon(
+                    Icons.lightbulb_outline_rounded,
+                    color: Color(0xFF06B6D4),
+                    size: 18,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Try: ${_kaggleSuggestions[widget.category]!["name"]} (${_kaggleSuggestions[widget.category]!["source"]})',
-                      style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF06B6D4)),
+                      style: GoogleFonts.outfit(
+                        fontSize: 11,
+                        color: const Color(0xFF06B6D4),
+                      ),
                     ),
                   ),
                 ],
@@ -426,14 +503,25 @@ class _MlScreenState extends State<MlScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isUploading ? null : _pickAndUploadCsv,
                   icon: _isUploading
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Icon(Icons.upload_file_rounded, size: 18),
-                  label: Text(_isUploading ? 'Uploading…' : 'Upload CSV / ARFF File'),
+                  label: Text(
+                    _isUploading ? 'Uploading…' : 'Upload CSV / ARFF File',
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEF4444),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -447,7 +535,9 @@ class _MlScreenState extends State<MlScreen> {
                     foregroundColor: const Color(0xFF06B6D4),
                     side: const BorderSide(color: Color(0xFF06B6D4)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -460,17 +550,27 @@ class _MlScreenState extends State<MlScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFF10B981).withOpacity(0.12),
-                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.3)),
+                border: Border.all(
+                  color: const Color(0xFF10B981).withOpacity(0.3),
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 20),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: Color(0xFF10B981),
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Dataset Loaded: ${_datasetInfo!['total_rows']} rows · ${_datasetInfo!['feature_count']} features',
-                      style: GoogleFonts.outfit(color: const Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 13),
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFF10B981),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -500,12 +600,18 @@ class _MlScreenState extends State<MlScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.bar_chart_rounded, color: Color(0xFFDC2626), size: 22),
+              const Icon(
+                Icons.bar_chart_rounded,
+                color: Color(0xFFDC2626),
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Step 2: Exploratory Data Analysis (EDA)',
                 style: GoogleFonts.outfit(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -515,13 +621,25 @@ class _MlScreenState extends State<MlScreen> {
           // Stat boxes grid
           Row(
             children: [
-              _buildStatBox('Total Rows', '${info['total_rows'] ?? 0}', const Color(0xFFEF4444)),
+              _buildStatBox(
+                'Total Rows',
+                '${info['total_rows'] ?? 0}',
+                const Color(0xFFEF4444),
+              ),
               const SizedBox(width: 8),
               _buildStatBox('Phishing', '$phishCount', const Color(0xFFEF4444)),
               const SizedBox(width: 8),
-              _buildStatBox('Legitimate', '$legitCount', const Color(0xFF10B981)),
+              _buildStatBox(
+                'Legitimate',
+                '$legitCount',
+                const Color(0xFF10B981),
+              ),
               const SizedBox(width: 8),
-              _buildStatBox('Class Balance', '${info['class_balance'] ?? 0}%', const Color(0xFFF59E0B)),
+              _buildStatBox(
+                'Class Balance',
+                '${info['class_balance'] ?? 0}%',
+                const Color(0xFFF59E0B),
+              ),
             ],
           ),
 
@@ -533,16 +651,33 @@ class _MlScreenState extends State<MlScreen> {
             child: ElevatedButton.icon(
               onPressed: _isTraining ? null : _trainModels,
               icon: _isTraining
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Icon(_trainResults != null ? Icons.keyboard_double_arrow_down_rounded : Icons.rocket_launch_rounded),
-              label: Text(_isTraining 
-                  ? 'Training Models…' 
-                  : (_trainResults != null ? '📊 View Results Below' : '🚀 Train ML Models')),
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(
+                      _trainResults != null
+                          ? Icons.keyboard_double_arrow_down_rounded
+                          : Icons.rocket_launch_rounded,
+                    ),
+              label: Text(
+                _isTraining
+                    ? 'Training Models…'
+                    : (_trainResults != null
+                          ? '📊 View Results Below'
+                          : '🚀 Train ML Models'),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFEF4444),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 4,
               ),
             ),
@@ -566,13 +701,18 @@ class _MlScreenState extends State<MlScreen> {
             Text(
               value,
               style: GoogleFonts.outfit(
-                fontSize: 18, fontWeight: FontWeight.bold, color: color,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               label,
-              style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF94A3B8)),
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                color: const Color(0xFF94A3B8),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -584,7 +724,8 @@ class _MlScreenState extends State<MlScreen> {
   Widget _buildTrainingResultsCard() {
     final modelsMap = _trainResults?['models'] as Map<String, dynamic>? ?? {};
     final modelNames = modelsMap.keys.toList();
-    final currentModelData = modelsMap[_selectedModel] as Map<String, dynamic>? ?? {};
+    final currentModelData =
+        modelsMap[_selectedModel] as Map<String, dynamic>? ?? {};
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -598,12 +739,18 @@ class _MlScreenState extends State<MlScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.emoji_events_rounded, color: Color(0xFFF59E0B), size: 22),
+              const Icon(
+                Icons.emoji_events_rounded,
+                color: Color(0xFFF59E0B),
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Step 3: Model Performance Results',
                 style: GoogleFonts.outfit(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -625,7 +772,10 @@ class _MlScreenState extends State<MlScreen> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? const Color(0xFFEF4444)
@@ -641,8 +791,12 @@ class _MlScreenState extends State<MlScreen> {
                     '${isBest ? "🏆 " : ""}$name',
                     style: GoogleFonts.outfit(
                       fontSize: 13,
-                      color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFF94A3B8),
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -658,16 +812,26 @@ class _MlScreenState extends State<MlScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFFEF4444).withOpacity(0.15),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+              border: Border.all(
+                color: const Color(0xFFEF4444).withOpacity(0.3),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.tune_rounded, color: Color(0xFFEF4444), size: 16),
+                const Icon(
+                  Icons.tune_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   'Viewing Metrics & Weights for: $_selectedModel',
-                  style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFFEF4444)),
+                  style: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFEF4444),
+                  ),
                 ),
               ],
             ),
@@ -677,23 +841,44 @@ class _MlScreenState extends State<MlScreen> {
           // Metric Badges
           Row(
             children: [
-              _buildMetricBadge('Accuracy', '${currentModelData['accuracy'] ?? 0}%', const Color(0xFFEF4444)),
+              _buildMetricBadge(
+                'Accuracy',
+                '${currentModelData['accuracy'] ?? 0}%',
+                const Color(0xFFEF4444),
+              ),
               const SizedBox(width: 8),
-              _buildMetricBadge('Precision', '${currentModelData['precision'] ?? 0}%', const Color(0xFF06B6D4)),
+              _buildMetricBadge(
+                'Precision',
+                '${currentModelData['precision'] ?? 0}%',
+                const Color(0xFF06B6D4),
+              ),
               const SizedBox(width: 8),
-              _buildMetricBadge('Recall', '${currentModelData['recall'] ?? 0}%', const Color(0xFFF59E0B)),
+              _buildMetricBadge(
+                'Recall',
+                '${currentModelData['recall'] ?? 0}%',
+                const Color(0xFFF59E0B),
+              ),
               const SizedBox(width: 8),
-              _buildMetricBadge('F1 Score', '${currentModelData['f1_score'] ?? 0}%', const Color(0xFF10B981)),
+              _buildMetricBadge(
+                'F1 Score',
+                '${currentModelData['f1_score'] ?? 0}%',
+                const Color(0xFF10B981),
+              ),
             ],
           ),
 
           const SizedBox(height: 20),
 
           // Feature Importance / Model Weights for Selected Model
-          if (currentModelData['feature_importance'] != null && (currentModelData['feature_importance'] as List).isNotEmpty) ...[
+          if (currentModelData['feature_importance'] != null &&
+              (currentModelData['feature_importance'] as List).isNotEmpty) ...[
             Text(
               '📊 Top Feature Weights / Importance ($_selectedModel)',
-              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 10),
             Container(
@@ -704,47 +889,61 @@ class _MlScreenState extends State<MlScreen> {
                 border: Border.all(color: Colors.white12),
               ),
               child: Column(
-                children: (currentModelData['feature_importance'] as List).take(5).map((f) {
-                  final feat = f as Map<String, dynamic>;
-                  final name = feat['feature'] ?? '';
-                  final imp = (feat['importance'] as num?)?.toDouble() ?? 0.0;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 140,
-                          child: Text(
-                            '$name',
-                            style: GoogleFonts.outfit(fontSize: 11, color: Colors.white70),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: (imp / (imp > 1.0 ? imp : 1.0)).clamp(0.05, 1.0),
-                              backgroundColor: Colors.white10,
-                              color: _selectedModel == 'Random Forest'
-                                  ? const Color(0xFF10B981)
-                                  : _selectedModel == 'Logistic Regression'
+                children: (currentModelData['feature_importance'] as List)
+                    .take(5)
+                    .map((f) {
+                      final feat = f as Map<String, dynamic>;
+                      final name = feat['feature'] ?? '';
+                      final imp =
+                          (feat['importance'] as num?)?.toDouble() ?? 0.0;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 140,
+                              child: Text(
+                                '$name',
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  color: Colors.white70,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: (imp / (imp > 1.0 ? imp : 1.0)).clamp(
+                                    0.05,
+                                    1.0,
+                                  ),
+                                  backgroundColor: Colors.white10,
+                                  color: _selectedModel == 'Random Forest'
+                                      ? const Color(0xFF10B981)
+                                      : _selectedModel == 'Logistic Regression'
                                       ? const Color(0xFF06B6D4)
                                       : const Color(0xFFF59E0B),
-                              minHeight: 6,
+                                  minHeight: 6,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '$imp',
+                              style: GoogleFonts.outfit(
+                                fontSize: 11,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$imp',
-                          style: GoogleFonts.outfit(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    })
+                    .toList(),
               ),
             ),
             const SizedBox(height: 20),
@@ -754,7 +953,11 @@ class _MlScreenState extends State<MlScreen> {
           if (currentModelData['confusion_matrix'] != null) ...[
             Text(
               '🎯 Confusion Matrix ($_selectedModel)',
-              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+              style: GoogleFonts.outfit(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 10),
             _buildConfusionMatrixGrid(currentModelData['confusion_matrix']),
@@ -765,7 +968,11 @@ class _MlScreenState extends State<MlScreen> {
           // Model Comparison Table
           Text(
             '📋 Models Comparison Table',
-            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 10),
           _buildComparisonTable(modelsMap),
@@ -804,25 +1011,38 @@ class _MlScreenState extends State<MlScreen> {
           // Header
           Row(
             children: [
-              const Icon(Icons.auto_awesome, color: Color(0xFF10B981), size: 22),
+              const Icon(
+                Icons.auto_awesome,
+                color: Color(0xFF10B981),
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Step 4: Auto-Analysis Results',
                   style: GoogleFonts.outfit(
-                    fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   modelUsed,
-                  style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF10B981), fontWeight: FontWeight.bold),
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    color: const Color(0xFF10B981),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -830,18 +1050,36 @@ class _MlScreenState extends State<MlScreen> {
           const SizedBox(height: 6),
           Text(
             'Dataset automatically scanned & classified using trained $modelUsed model',
-            style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF94A3B8)),
+            style: GoogleFonts.outfit(
+              fontSize: 11,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           const SizedBox(height: 16),
 
           // Summary Stats
           Row(
             children: [
-              _buildAnalysisStat('Total Scanned', '$totalRows', const Color(0xFF06B6D4), Icons.dataset_rounded),
+              _buildAnalysisStat(
+                'Total Scanned',
+                '$totalRows',
+                const Color(0xFF06B6D4),
+                Icons.dataset_rounded,
+              ),
               const SizedBox(width: 8),
-              _buildAnalysisStat('Malicious', '$spamCount ($spamPct%)', const Color(0xFFEF4444), Icons.dangerous_rounded),
+              _buildAnalysisStat(
+                'Malicious',
+                '$spamCount ($spamPct%)',
+                const Color(0xFFEF4444),
+                Icons.dangerous_rounded,
+              ),
               const SizedBox(width: 8),
-              _buildAnalysisStat('Safe', '$safeCount ($safePct%)', const Color(0xFF10B981), Icons.verified_user_rounded),
+              _buildAnalysisStat(
+                'Safe',
+                '$safeCount ($safePct%)',
+                const Color(0xFF10B981),
+                Icons.verified_user_rounded,
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -861,7 +1099,11 @@ class _MlScreenState extends State<MlScreen> {
                         alignment: Alignment.center,
                         child: Text(
                           '${spamPct}% Spam',
-                          style: GoogleFonts.outfit(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.outfit(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -873,7 +1115,11 @@ class _MlScreenState extends State<MlScreen> {
                         alignment: Alignment.center,
                         child: Text(
                           '${safePct}% Safe',
-                          style: GoogleFonts.outfit(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.outfit(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -887,10 +1133,16 @@ class _MlScreenState extends State<MlScreen> {
           if (sampleSpam.isNotEmpty) ...[
             Text(
               '🚨 Sample Malicious/Spam Detected:',
-              style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFFEF4444)),
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFEF4444),
+              ),
             ),
             const SizedBox(height: 8),
-            ...sampleSpam.map((item) => _buildSampleRow(item, const Color(0xFFEF4444))),
+            ...sampleSpam.map(
+              (item) => _buildSampleRow(item, const Color(0xFFEF4444)),
+            ),
             const SizedBox(height: 12),
           ],
 
@@ -898,17 +1150,28 @@ class _MlScreenState extends State<MlScreen> {
           if (sampleSafe.isNotEmpty) ...[
             Text(
               '✅ Sample Safe/Legitimate Detected:',
-              style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold, color: const Color(0xFF10B981)),
+              style: GoogleFonts.outfit(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF10B981),
+              ),
             ),
             const SizedBox(height: 8),
-            ...sampleSafe.map((item) => _buildSampleRow(item, const Color(0xFF10B981))),
+            ...sampleSafe.map(
+              (item) => _buildSampleRow(item, const Color(0xFF10B981)),
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildAnalysisStat(String label, String value, Color color, IconData icon) {
+  Widget _buildAnalysisStat(
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -923,13 +1186,20 @@ class _MlScreenState extends State<MlScreen> {
             const SizedBox(height: 4),
             Text(
               value,
-              style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 2),
             Text(
               label,
-              style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF94A3B8)),
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                color: const Color(0xFF94A3B8),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -958,7 +1228,11 @@ class _MlScreenState extends State<MlScreen> {
             ),
             child: Text(
               '#${row['row']}',
-              style: GoogleFonts.outfit(fontSize: 10, color: color, fontWeight: FontWeight.bold),
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -972,7 +1246,9 @@ class _MlScreenState extends State<MlScreen> {
           ),
           const SizedBox(width: 8),
           Icon(
-            color == const Color(0xFFEF4444) ? Icons.warning_rounded : Icons.check_circle_rounded,
+            color == const Color(0xFFEF4444)
+                ? Icons.warning_rounded
+                : Icons.check_circle_rounded,
             color: color,
             size: 16,
           ),
@@ -980,7 +1256,6 @@ class _MlScreenState extends State<MlScreen> {
       ),
     );
   }
-
 
   Widget _buildMetricBadge(String label, String value, Color color) {
     return Expanded(
@@ -996,13 +1271,18 @@ class _MlScreenState extends State<MlScreen> {
             Text(
               value,
               style: GoogleFonts.outfit(
-                fontSize: 20, fontWeight: FontWeight.w800, color: color,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: color,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               label,
-              style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF94A3B8)),
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                color: const Color(0xFF94A3B8),
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -1027,10 +1307,30 @@ class _MlScreenState extends State<MlScreen> {
         mainAxisSpacing: 8,
         childAspectRatio: 2.2,
         children: [
-          _buildCmCell('True Negative (TN)', '$tn', 'Legit → Legit ✓', const Color(0xFF10B981)),
-          _buildCmCell('False Positive (FP)', '$fp', 'Legit → Phish ✗', const Color(0xFFF59E0B)),
-          _buildCmCell('False Negative (FN)', '$fn', 'Phish → Legit ✗', const Color(0xFFEF4444)),
-          _buildCmCell('True Positive (TP)', '$tp', 'Phish → Phish ✓', const Color(0xFFEF4444)),
+          _buildCmCell(
+            'True Negative (TN)',
+            '$tn',
+            'Legit → Legit ✓',
+            const Color(0xFF10B981),
+          ),
+          _buildCmCell(
+            'False Positive (FP)',
+            '$fp',
+            'Legit → Phish ✗',
+            const Color(0xFFF59E0B),
+          ),
+          _buildCmCell(
+            'False Negative (FN)',
+            '$fn',
+            'Phish → Legit ✗',
+            const Color(0xFFEF4444),
+          ),
+          _buildCmCell(
+            'True Positive (TP)',
+            '$tp',
+            'Phish → Phish ✓',
+            const Color(0xFFEF4444),
+          ),
         ],
       );
     } catch (_) {
@@ -1051,11 +1351,18 @@ class _MlScreenState extends State<MlScreen> {
         children: [
           Text(
             val,
-            style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold, color: col),
+            style: GoogleFonts.outfit(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: col,
+            ),
           ),
           Text(
             title,
-            style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF94A3B8)),
+            style: GoogleFonts.outfit(
+              fontSize: 10,
+              color: const Color(0xFF94A3B8),
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -1079,8 +1386,12 @@ class _MlScreenState extends State<MlScreen> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
-              color: isBest ? const Color(0xFFEF4444).withOpacity(0.1) : Colors.transparent,
+              border: Border(
+                bottom: BorderSide(color: Colors.white.withOpacity(0.05)),
+              ),
+              color: isBest
+                  ? const Color(0xFFEF4444).withOpacity(0.1)
+                  : Colors.transparent,
             ),
             child: Row(
               children: [
@@ -1089,20 +1400,29 @@ class _MlScreenState extends State<MlScreen> {
                   child: Text(
                     '${isBest ? "🏆 " : ""}$name',
                     style: GoogleFonts.outfit(
-                      fontSize: 12, fontWeight: isBest ? FontWeight.bold : FontWeight.normal, color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: isBest ? FontWeight.bold : FontWeight.normal,
+                      color: Colors.white,
                     ),
                   ),
                 ),
                 Expanded(
                   child: Text(
                     'Acc: ${m['accuracy']}%',
-                    style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF10B981)),
+                    style: GoogleFonts.outfit(
+                      fontSize: 11,
+                      color: const Color(0xFF10B981),
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Text(
                     'F1: ${m['f1_score']}%',
-                    style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
+                    style: GoogleFonts.outfit(
+                      fontSize: 11,
+                      color: const Color(0xFFEF4444),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -1112,6 +1432,7 @@ class _MlScreenState extends State<MlScreen> {
       ),
     );
   }
+
   Future<void> _executeLiveScan() async {
     final inputContent = _scanInputController.text.trim();
     if (inputContent.isEmpty) return;
@@ -1187,19 +1508,23 @@ class _MlScreenState extends State<MlScreen> {
   }
 
   Widget _buildLiveScannerCard() {
-    final String label = {
-      'url': 'Suspicious URL',
-      'text': 'SMS / Text Message',
-      'email': 'Raw Email Headers',
-      'spam': 'Spam / Phishing Message',
-    }[widget.category] ?? 'suspicious content';
+    final String label =
+        {
+          'url': 'Suspicious URL',
+          'text': 'SMS / Text Message',
+          'email': 'Raw Email Headers',
+          'spam': 'Spam / Phishing Message',
+        }[widget.category] ??
+        'suspicious content';
 
-    final String placeholder = {
-      'url': 'http://secure-login-chase-update.xyz/login',
-      'text': 'Urgent: Your account is locked. Verify at http://...',
-      'email': 'Delivered-To: victim@gmail.com\nReceived: from ...',
-      'spam': 'Free entry: Win \$1000 cash prize now. Click here!',
-    }[widget.category] ?? 'Enter content here...';
+    final String placeholder =
+        {
+          'url': 'http://secure-login-chase-update.xyz/login',
+          'text': 'Urgent: Your account is locked. Verify at http://...',
+          'email': 'Delivered-To: victim@gmail.com\nReceived: from ...',
+          'spam': 'Free entry: Win \$1000 cash prize now. Click here!',
+        }[widget.category] ??
+        'Enter content here...';
 
     final isScreenshot = widget.category == 'screenshot';
 
@@ -1215,12 +1540,18 @@ class _MlScreenState extends State<MlScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.radar_rounded, color: Color(0xFF00F2FE), size: 22),
+              const Icon(
+                Icons.radar_rounded,
+                color: Color(0xFF00F2FE),
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(
                 '⚡ Instant Threat Scanner (Type Message or Link)',
                 style: GoogleFonts.outfit(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -1230,7 +1561,10 @@ class _MlScreenState extends State<MlScreen> {
             isScreenshot
                 ? 'Scan a suspicious website screenshot image to analyze visual & brand threat features.'
                 : 'Enter a $label to run it through your trained ML classifier in real-time.',
-            style: GoogleFonts.outfit(fontSize: 12, color: const Color(0xFF94A3B8)),
+            style: GoogleFonts.outfit(
+              fontSize: 12,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           const SizedBox(height: 18),
 
@@ -1240,14 +1574,27 @@ class _MlScreenState extends State<MlScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isScanning ? null : _pickAndScanScreenshot,
                 icon: _isScanning
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Icon(Icons.image_search_rounded, size: 18),
-                label: Text(_isScanning ? 'Analyzing Screenshot...' : 'Scan Screenshot Image'),
+                label: Text(
+                  _isScanning
+                      ? 'Analyzing Screenshot...'
+                      : 'Scan Screenshot Image',
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00F2FE),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -1258,8 +1605,14 @@ class _MlScreenState extends State<MlScreen> {
               decoration: InputDecoration(
                 labelText: 'Enter $label',
                 hintText: placeholder,
-                labelStyle: GoogleFonts.outfit(color: const Color(0xFF00F2FE), fontSize: 13),
-                hintStyle: GoogleFonts.outfit(color: const Color(0xFF64748B), fontSize: 13),
+                labelStyle: GoogleFonts.outfit(
+                  color: const Color(0xFF00F2FE),
+                  fontSize: 13,
+                ),
+                hintStyle: GoogleFonts.outfit(
+                  color: const Color(0xFF64748B),
+                  fontSize: 13,
+                ),
                 focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Color(0xFF00F2FE)),
                 ),
@@ -1267,7 +1620,10 @@ class _MlScreenState extends State<MlScreen> {
                   borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                 ),
               ),
-              style: GoogleFonts.spaceGrotesk(color: Colors.white, fontSize: 13),
+              style: GoogleFonts.spaceGrotesk(
+                color: Colors.white,
+                fontSize: 13,
+              ),
             ),
             const SizedBox(height: 12),
             SizedBox(
@@ -1275,14 +1631,27 @@ class _MlScreenState extends State<MlScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isScanning ? null : _executeLiveScan,
                 icon: _isScanning
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
                     : const Icon(Icons.radar_rounded, size: 18),
-                label: Text(_isScanning ? 'Scanning Content...' : '⚡ Scan & Analyze Threat'),
+                label: Text(
+                  _isScanning
+                      ? 'Scanning Content...'
+                      : '⚡ Scan & Analyze Threat',
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00F2FE),
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -1306,7 +1675,9 @@ class _MlScreenState extends State<MlScreen> {
         : (isSuspicious ? const Color(0xFFF59E0B) : const Color(0xFF10B981));
     final String riskText = isDangerous
         ? '🔴 CONFIRMED THREAT DETECTED'
-        : (isSuspicious ? '⚠️ SUSPICIOUS THREAT WARNING' : '🟢 SAFE & CLEAN CONTENT');
+        : (isSuspicious
+              ? '⚠️ SUSPICIOUS THREAT WARNING'
+              : '🟢 SAFE & CLEAN CONTENT');
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1354,24 +1725,33 @@ class _MlScreenState extends State<MlScreen> {
           const SizedBox(height: 16),
           Text(
             '🔍 Prediction Findings:',
-            style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+            style: GoogleFonts.outfit(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 6),
-          ...scan.reasons.map((reason) => Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('• ', style: TextStyle(color: Colors.white70)),
-                    Expanded(
-                      child: Text(
-                        reason,
-                        style: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontSize: 12),
+          ...scan.reasons.map(
+            (reason) => Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('• ', style: TextStyle(color: Colors.white70)),
+                  Expanded(
+                    child: Text(
+                      reason,
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFF94A3B8),
+                        fontSize: 12,
                       ),
                     ),
-                  ],
-                ),
-              )),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
