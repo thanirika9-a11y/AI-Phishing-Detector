@@ -48,7 +48,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Auth Endpoints
+# Root & Health Endpoints
+
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "message": "Aegis AI Phishing & Threat Detection API is running!",
+        "version": "1.0.0",
+        "docs_url": "/docs",
+        "health_check": "/api/health"
+    }
 
 @app.get("/api/health")
 def health():
