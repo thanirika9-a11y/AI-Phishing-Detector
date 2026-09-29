@@ -78,6 +78,9 @@ class _MlScreenState extends State<MlScreen> {
             }
           });
           _fetchEda();
+          if (_trainResults != null) {
+            _fetchAutoAnalysis();
+          }
         }
       }
     } catch (_) {}
