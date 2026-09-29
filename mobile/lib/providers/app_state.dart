@@ -68,7 +68,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _apiService.fetchAnalytics();
+      final userId = _currentUser?['userId'] is int ? _currentUser!['userId'] as int : null;
+      final data = await _apiService.fetchAnalytics(userId: userId);
       _totalScans = data['total_scans'] ?? 0;
       _totalReports = data['total_reports'] ?? 0;
       

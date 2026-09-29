@@ -128,8 +128,9 @@ class ApiService {
   }
 
   // Analytics: Get telemetry dashboard data
-  Future<Map<String, dynamic>> fetchAnalytics() async {
-    final response = await http.get(Uri.parse(ApiConfig.analyticsUrl));
+  Future<Map<String, dynamic>> fetchAnalytics({int? userId}) async {
+    final url = userId != null ? '${ApiConfig.analyticsUrl}?user_id=$userId' : ApiConfig.analyticsUrl;
+    final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {

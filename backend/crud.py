@@ -29,17 +29,26 @@ def create_scan(db: Session, input_type: str, input_content: str, risk_score: in
     db.refresh(db_scan)
     return db_scan
 
-def get_scans(db: Session, limit: int = 50):
-    return db.query(models.ScanHistory).order_by(models.ScanHistory.timestamp.desc()).limit(limit).all()
+def get_scans(db: Session, limit: int = 50, user_id: int = None):
+    q = db.query(models.ScanHistory)
+    if user_id is not None:
+        q = q.filter(models.ScanHistory.user_id == user_id)
+    return q.order_by(models.ScanHistory.timestamp.desc()).limit(limit).all()
 
-def get_scan_count(db: Session) -> int:
-    return db.query(func.count(models.ScanHistory.id)).scalar() or 0
+def get_scan_count(db: Session, user_id: int = None) -> int:
+    q = db.query(func.count(models.ScanHistory.id))
+    if user_id is not None:
+        q = q.filter(models.ScanHistory.user_id == user_id)
+    return q.scalar() or 0
 
-def get_scans_breakdown(db: Session):
-    results = db.query(
+def get_scans_breakdown(db: Session, user_id: int = None):
+    q = db.query(
         models.ScanHistory.risk_level, 
         func.count(models.ScanHistory.id)
-    ).group_by(models.ScanHistory.risk_level).all()
+    )
+    if user_id is not None:
+        q = q.filter(models.ScanHistory.user_id == user_id)
+    results = q.group_by(models.ScanHistory.risk_level).all()
     
     breakdown = {"safe": 0, "suspicious": 0, "dangerous": 0}
     for risk_level, count in results:

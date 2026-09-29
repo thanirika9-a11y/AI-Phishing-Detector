@@ -244,7 +244,24 @@ def read_reports(limit: int = 50, db: Session = Depends(get_db)):
     return crud.get_reports(db=db, limit=limit)
 
 @app.get("/api/analytics", response_model=schemas.AnalyticsResponse)
-def get_analytics(db: Session = Depends(get_db)):
+def get_analytics(user_id: int = None, db: Session = Depends(get_db)):
+    if user_id is not None:
+        user_scans = crud.get_scan_count(db, user_id=user_id)
+        user_breakdown = crud.get_scans_breakdown(db, user_id=user_id)
+        user_recent = crud.get_scans(db, limit=10, user_id=user_id)
+        user_reports = crud.get_report_count(db)
+        reports_by_type = crud.get_reports_by_type(db)
+        recent_reports = crud.get_reports(db, limit=10)
+        
+        return {
+            "total_scans": user_scans,
+            "total_reports": user_reports,
+            "scans_breakdown": user_breakdown,
+            "reports_by_type": reports_by_type,
+            "recent_scans": user_recent,
+            "recent_reports": recent_reports
+        }
+
     db_scans = crud.get_scan_count(db)
     db_reports = crud.get_report_count(db)
     scans_breakdown = crud.get_scans_breakdown(db)
@@ -274,7 +291,7 @@ def get_analytics(db: Session = Depends(get_db)):
             reports_by_type[typology_key] = reports_by_type.get(typology_key, 0) + phish
 
     total_scans = db_scans + ml_total_scans
-    total_reports = db_reports + (ml_phish // 10)  # estimate reports from detected threats
+    total_reports = db_reports + (ml_phish // 10)
 
     # Add breakdown counts
     scans_breakdown["safe"] = scans_breakdown.get("safe", 0) + ml_legit
