@@ -46,7 +46,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchMlStatus() async {
     try {
-      final res = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/ml/all-categories-status'));
+      final appState = Provider.of<AppState>(context, listen: false);
+      final userId = appState.currentUser?['userId'];
+      final url = userId != null
+          ? '${ApiConfig.baseUrl}/api/ml/all-categories-status?user_id=$userId'
+          : '${ApiConfig.baseUrl}/api/ml/all-categories-status';
+      final res = await http.get(Uri.parse(url));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (mounted) {

@@ -15,20 +15,23 @@ from auth import hash_password, verify_password
 from eda_generator import load_and_preprocess, generate_eda
 from ml_trainer import train_models
 
-# ── In-process ML state (demo mode — resets on server restart) ──
+# ── In-process ML state (user-scoped / category-scoped) ──
 _ml_states: dict = {}
 
-def _get_state(category: str) -> dict:
-    if category not in _ml_states:
-        _ml_states[category] = {
+def _get_state(category: str, user_id: int = None) -> dict:
+    key = f"{category}_{user_id}" if user_id is not None else category
+    if key not in _ml_states:
+        _ml_states[key] = {
             "dataset_info": None,
             "eda_results": None,
             "train_results": None,
             "feature_df": None,
             "labels": None,
             "raw_df": None,
+            "category": category,
+            "user_id": user_id,
         }
-    return _ml_states[category]
+    return _ml_states[key]
 
 # Initialize Database tables
 models.Base.metadata.create_all(bind=engine)
@@ -421,7 +424,7 @@ def get_leaderboard(limit: int = 10, db: Session = Depends(get_db)):
 # ══════════════════════════════════════════════════════════════
 
 @app.post("/api/ml/upload-dataset")
-async def upload_dataset(file: UploadFile = File(...), category: str = "url"):
+async def upload_dataset(file: UploadFile = File(...), category: str = "url", user_id: int = None):
     """Upload a phishing CSV or ARFF dataset. Returns dataset info and first-pass EDA."""
     fname = file.filename.lower()
     if not (fname.endswith(".csv") or fname.endswith(".arff")):
@@ -441,8 +444,8 @@ async def upload_dataset(file: UploadFile = File(...), category: str = "url"):
     # Generate EDA immediately
     eda = generate_eda(raw_df, labels, info.get("url_column"), info)
 
-    # Store in-process (per-category)
-    state = _get_state(category)
+    # Store in-process (per-category, per-user)
+    state = _get_state(category, user_id=user_id)
     state["dataset_info"]  = info
     state["eda_results"]   = eda
     state["feature_df"]    = feature_df
@@ -460,18 +463,18 @@ async def upload_dataset(file: UploadFile = File(...), category: str = "url"):
 
 
 @app.get("/api/ml/eda-results")
-def get_eda_results(category: str = "url"):
+def get_eda_results(category: str = "url", user_id: int = None):
     """Return cached EDA results from the last uploaded dataset."""
-    state = _get_state(category)
+    state = _get_state(category, user_id=user_id)
     if not state["eda_results"]:
         raise HTTPException(status_code=404, detail="No dataset uploaded yet. Please upload a CSV first.")
     return state["eda_results"]
 
 
 @app.post("/api/ml/train")
-def train_ml_models(category: str = "url"):
+def train_ml_models(category: str = "url", user_id: int = None):
     """Train all three ML models on the uploaded dataset and return performance metrics."""
-    state = _get_state(category)
+    state = _get_state(category, user_id=user_id)
     if state["feature_df"] is None or state["labels"] is None:
         raise HTTPException(status_code=400, detail="No dataset loaded. Upload a CSV dataset first.")
 
@@ -528,9 +531,9 @@ def train_ml_models(category: str = "url"):
 
 
 @app.get("/api/ml/model-status")
-def get_model_status(category: str = "url"):
+def get_model_status(category: str = "url", user_id: int = None):
     """Return current training results if available."""
-    state = _get_state(category)
+    state = _get_state(category, user_id=user_id)
     return {
         "dataset_loaded":  state["dataset_info"] is not None,
         "training_done":   state["train_results"] is not None,
@@ -540,10 +543,14 @@ def get_model_status(category: str = "url"):
 
 
 @app.get("/api/ml/all-categories-status")
-def get_all_categories_status():
+def get_all_categories_status(user_id: int = None):
     result = {}
-    for cat, state in _ml_states.items():
+    for key, state in _ml_states.items():
         if state["dataset_info"] is not None:
+            # Check user_id filter
+            if user_id is not None and state.get("user_id") != user_id:
+                continue
+            cat = state.get("category", key.split("_")[0])
             result[cat] = {
                 "dataset_info": state["dataset_info"],
                 "training_done": state["train_results"] is not None,
@@ -553,9 +560,9 @@ def get_all_categories_status():
 
 
 @app.get("/api/ml/auto-analyze")
-def auto_analyze_dataset(category: str = "url"):
+def auto_analyze_dataset(category: str = "url", user_id: int = None):
     """Use the trained Random Forest model to classify all rows in the uploaded dataset."""
-    state = _get_state(category)
+    state = _get_state(category, user_id=user_id)
     if state["feature_df"] is None or state["labels"] is None:
         raise HTTPException(status_code=400, detail="No dataset loaded.")
     if state["train_results"] is None:
