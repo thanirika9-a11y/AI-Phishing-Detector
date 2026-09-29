@@ -70,11 +70,11 @@ export default function App() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
+  const API_URL = "https://ai-phishing-detector-production.up.railway.app";
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/analytics');
+      const response = await fetch(`${API_URL}/api/analytics`);
       if (response.ok) {
         const data = await response.json();
         setAnalytics(data);
@@ -102,7 +102,7 @@ export default function App() {
 
   const triggerExport = () => {
     if (!usingMockData) {
-      window.open('http://localhost:8000/api/export', '_blank');
+      window.open(`${API_URL}/api/export`, '_blank');
     }
   };
 
