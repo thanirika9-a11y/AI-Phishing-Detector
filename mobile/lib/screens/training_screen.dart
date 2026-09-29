@@ -90,19 +90,19 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final appState = Provider.of<AppState>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF06030F),
+      backgroundColor: const Color(0xFF000000),
       body: Stack(
         children: [
           // Background Glow Orbs
           Positioned(
             top: -100,
             left: -100,
-            child: _buildGlowOrb(const Color(0xFF8B5CF6), 280),
+            child: _buildGlowOrb(const Color(0xFFEF4444), 280),
           ),
           Positioned(
             bottom: -80,
             right: -80,
-            child: _buildGlowOrb(const Color(0xFFEC4899), 250),
+            child: _buildGlowOrb(const Color(0xFFDC2626), 250),
           ),
 
           SafeArea(
@@ -118,7 +118,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                     style: GoogleFonts.outfit(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF8B5CF6),
+                      color: const Color(0xFFEF4444),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -186,7 +186,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF120828).withOpacity(0.55),
+            color: const Color(0xFF1A0000).withOpacity(0.55),
             border: Border.all(color: Colors.white.withOpacity(0.06)),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -210,7 +210,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
             children: [
               Text(
                 'Question ${_currentIndex + 1} of ${_fallbackQuestions.length}',
-                style: GoogleFonts.outfit(color: const Color(0xFF8B5CF6), fontSize: 12, fontWeight: FontWeight.bold),
+                style: GoogleFonts.outfit(color: const Color(0xFFEF4444), fontSize: 12, fontWeight: FontWeight.bold),
               ),
               Text(
                 'Score: $_score',
@@ -224,7 +224,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: Colors.white.withOpacity(0.04),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFEF4444)),
               minHeight: 6,
             ),
           ),
@@ -268,7 +268,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                 border = const BorderSide(color: Color(0xFFEF4444));
               }
             } else if (isSelected) {
-              border = const BorderSide(color: Color(0xFF8B5CF6));
+              border = const BorderSide(color: Color(0xFFEF4444));
             }
 
             return Padding(
@@ -337,7 +337,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                 height: 44,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFF4FACFE)],
+                    colors: [Color(0xFFEF4444), Color(0xFFFF6B6B)],
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -391,14 +391,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF8B5CF6)),
+                border: Border.all(color: const Color(0xFFEF4444)),
                 borderRadius: BorderRadius.circular(10),
               ),
               alignment: Alignment.center,
               child: Text(
                 'Retake Practice Lab',
                 style: GoogleFonts.outfit(
-                  color: const Color(0xFF8B5CF6),
+                  color: const Color(0xFFEF4444),
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
@@ -416,7 +416,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 24),
         decoration: BoxDecoration(
-          color: const Color(0xFF120828).withOpacity(0.4),
+          color: const Color(0xFF1A0000).withOpacity(0.4),
           border: Border.all(color: Colors.white.withOpacity(0.04)),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -441,7 +441,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF120828).withOpacity(0.5),
+            color: const Color(0xFF1A0000).withOpacity(0.5),
             border: Border.all(color: Colors.white.withOpacity(0.04)),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -475,7 +475,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
               Text(
                 '${score.score} / ${score.total}',
                 style: GoogleFonts.spaceGrotesk(
-                  color: const Color(0xFF8B5CF6),
+                  color: const Color(0xFFEF4444),
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),

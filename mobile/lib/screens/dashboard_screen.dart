@@ -1,9 +1,13 @@
 import 'dart:ui';
+import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 import '../providers/app_state.dart';
 import '../models/scan_model.dart';
+import '../config/api_config.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,12 +17,46 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  Map<String, dynamic> _mlCategories = {};
+  int _mlTotalCategories = 0;
+  Timer? _pollingTimer;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AppState>(context, listen: false).refreshTelemetry();
+      _fetchMlStatus();
     });
+
+    // Auto-update dashboard telemetry every 3 seconds dynamically
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (mounted) {
+        Provider.of<AppState>(context, listen: false).refreshTelemetry();
+        _fetchMlStatus();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchMlStatus() async {
+    try {
+      final res = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/ml/all-categories-status'));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (mounted) {
+          setState(() {
+            _mlCategories = Map<String, dynamic>.from(data['categories'] ?? {});
+            _mlTotalCategories = data['total_categories'] ?? 0;
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   @override
@@ -26,31 +64,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final appState = Provider.of<AppState>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF06030F),
-      body: Stack(
-        children: [
-          // Background Glow Orbs
-          Positioned(
-            top: -150,
-            right: -100,
-            child: _buildGlowOrb(const Color(0xFF8B5CF6), 280),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0D0202), // Dark reddish-black
+              Color(0xFF030101), // Almost solid black
+              Color(0xFF060000), // Slightly warmer deep black
+            ],
           ),
-          Positioned(
-            bottom: -100,
-            left: -100,
-            child: _buildGlowOrb(const Color(0xFFEC4899), 280),
-          ),
+        ),
+        child: Stack(
+          children: [
+            // Background Glow Orbs
+            Positioned(
+              top: -150,
+              right: -100,
+              child: _buildGlowOrb(const Color(0xFFEF4444), 320),
+            ),
+            Positioned(
+              bottom: -100,
+              left: -100,
+              child: _buildGlowOrb(const Color(0xFFDC2626), 320),
+            ),
+
 
           SafeArea(
             child: RefreshIndicator(
               onRefresh: appState.refreshTelemetry,
-              color: const Color(0xFF8B5CF6),
-              backgroundColor: const Color(0xFF120828),
+              color: const Color(0xFFEF4444),
+              backgroundColor: const Color(0xFF1A0000),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                padding: const EdgeInsets.fromLTRB(20.0, 24.0, 20.0, 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -70,6 +120,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     _buildScamTypology(appState),
                     const SizedBox(height: 28),
 
+                    // ML Pipeline Status
+                    if (_mlTotalCategories > 0) ...[
+                      Text(
+                        'ML Pipeline Status',
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ..._mlCategories.entries.map((e) => _buildMlCategoryCard(e.key, Map<String, dynamic>.from(e.value))),
+                      const SizedBox(height: 28),
+                    ],
+
                     // Recent Threat Scans header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -87,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: Text(
                             'Scan New →',
                             style: GoogleFonts.outfit(
-                              color: const Color(0xFF8B5CF6),
+                              color: const Color(0xFFEF4444),
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -122,7 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: Text(
                             'Report New →',
                             style: GoogleFonts.outfit(
-                              color: const Color(0xFF8B5CF6),
+                              color: const Color(0xFFEF4444),
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -144,6 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -176,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: GoogleFonts.outfit(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF8B5CF6),
+                color: const Color(0xFFEF4444),
                 letterSpacing: 1.5,
               ),
             ),
@@ -275,7 +341,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF120828).withValues(alpha: 0.55),
+            color: const Color(0xFF1A0000).withValues(alpha: 0.55),
             border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -333,7 +399,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF120828).withValues(alpha: 0.55),
+            color: const Color(0xFF1A0000).withValues(alpha: 0.55),
             border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -372,7 +438,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF120828).withValues(alpha: 0.55),
+            color: const Color(0xFF1A0000).withValues(alpha: 0.55),
             border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -469,7 +535,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // Extract first reason
     String reasonText = "No risk markers identified.";
     try {
-      import 'dart:convert';
       final details = jsonDecode(scan.detailsJson);
       if (details['reasons'] != null && details['reasons'].isNotEmpty) {
         reasonText = details['reasons'][0];
@@ -479,7 +544,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withValues(alpha: 0.5),
+        color: const Color(0xFF1A0000).withValues(alpha: 0.5),
         border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -570,7 +635,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withValues(alpha: 0.5),
+        color: const Color(0xFF1A0000).withValues(alpha: 0.5),
         border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -641,7 +706,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withValues(alpha: 0.4),
+        color: const Color(0xFF1A0000).withValues(alpha: 0.4),
         border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -676,7 +741,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withValues(alpha: 0.4),
+        color: const Color(0xFF1A0000).withValues(alpha: 0.4),
         border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -703,5 +768,120 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
     if (diff.inHours < 24) return '${diff.inHours}h ago';
     return '${diff.inDays}d ago';
+  }
+
+  Widget _buildMlCategoryCard(String category, Map<String, dynamic> data) {
+    final catLabel = {
+      'url': '🔗 URL Scan',
+      'text': '📝 Text Scan',
+      'screenshot': '📸 Screenshot',
+      'email': '📧 Email Header',
+      'spam': '🚫 Spam Lookup',
+    }[category] ?? category.toUpperCase();
+
+    final info = data['dataset_info'] as Map<String, dynamic>?;
+    final trained = data['training_done'] == true;
+    final trainRes = data['training_results'] as Map<String, dynamic>?;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.04),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: trained
+                  ? const Color(0xFF10B981).withOpacity(0.15)
+                  : const Color(0xFFEF4444).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Icon(
+                trained ? Icons.check_circle_rounded : Icons.dataset_rounded,
+                color: trained ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  catLabel,
+                  style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${info?['total_rows'] ?? '?'} rows · ${info?['feature_count'] ?? '?'} features',
+                  style: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          if (trained && trainRes != null) ...[
+            Builder(
+              builder: (context) {
+                double acc = 0.0;
+                final bestModel = trainRes['best_model'];
+                final models = trainRes['models'];
+                if (bestModel != null && models is Map && models.containsKey(bestModel)) {
+                  final mData = models[bestModel];
+                  if (mData is Map && mData.containsKey('accuracy')) {
+                    acc = (mData['accuracy'] as num).toDouble();
+                  }
+                } else if (trainRes.containsKey('best_accuracy')) {
+                  final raw = trainRes['best_accuracy'];
+                  if (raw is num) {
+                    acc = raw > 1.0 ? raw.toDouble() : raw.toDouble() * 100.0;
+                  }
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${acc.toStringAsFixed(1)}%',
+                      style: GoogleFonts.outfit(
+                        color: const Color(0xFF10B981),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      bestModel ?? 'Trained',
+                      style: GoogleFonts.outfit(color: const Color(0xFF94A3B8), fontSize: 11),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ] else
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Not trained',
+                style: GoogleFonts.outfit(color: const Color(0xFFF59E0B), fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

@@ -82,7 +82,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Color _getStrengthColor() {
     if (_passwordScore <= 25) return const Color(0xFFEF4444);
     if (_passwordScore <= 50) return const Color(0xFFF59E0B);
-    if (_passwordScore <= 75) return const Color(0xFF8B5CF6);
+    if (_passwordScore <= 75) return const Color(0xFFEF4444);
     return const Color(0xFF10B981);
   }
 
@@ -117,19 +117,19 @@ class _AuthScreenState extends State<AuthScreen> {
     final appState = Provider.of<AppState>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF06030F),
+      backgroundColor: const Color(0xFF000000),
       body: Stack(
         children: [
           // Background Orbs
           Positioned(
             top: -100,
             left: -100,
-            child: _buildGlowOrb(const Color(0xFF8B5CF6), 300),
+            child: _buildGlowOrb(const Color(0xFFEF4444), 300),
           ),
           Positioned(
             bottom: -80,
             right: -80,
-            child: _buildGlowOrb(const Color(0xFFEC4899), 250),
+            child: _buildGlowOrb(const Color(0xFFDC2626), 250),
           ),
 
           Center(
@@ -141,7 +141,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF120828).withOpacity(0.65),
+                      color: const Color(0xFF1A0000).withOpacity(0.65),
                       border: Border.all(color: Colors.white.withOpacity(0.06)),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -184,7 +184,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   decoration: BoxDecoration(
                                     border: Border(
                                       bottom: BorderSide(
-                                        color: !_isSignup ? const Color(0xFF8B5CF6) : Colors.transparent,
+                                        color: !_isSignup ? const Color(0xFFEF4444) : Colors.transparent,
                                         width: 2,
                                       ),
                                     ),
@@ -194,7 +194,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.bold,
-                                      color: !_isSignup ? const Color(0xFF8B5CF6) : const Color(0xFF64748B),
+                                      color: !_isSignup ? const Color(0xFFEF4444) : const Color(0xFF64748B),
                                     ),
                                   ),
                                 ),
@@ -213,7 +213,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   decoration: BoxDecoration(
                                     border: Border(
                                       bottom: BorderSide(
-                                        color: _isSignup ? const Color(0xFF8B5CF6) : Colors.transparent,
+                                        color: _isSignup ? const Color(0xFFEF4444) : Colors.transparent,
                                         width: 2,
                                       ),
                                     ),
@@ -223,7 +223,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.outfit(
                                       fontWeight: FontWeight.bold,
-                                      color: _isSignup ? const Color(0xFF8B5CF6) : const Color(0xFF64748B),
+                                      color: _isSignup ? const Color(0xFFEF4444) : const Color(0xFF64748B),
                                     ),
                                   ),
                                 ),
@@ -257,7 +257,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+                              borderSide: const BorderSide(color: Color(0xFFEF4444)),
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           ),
@@ -289,7 +289,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+                              borderSide: const BorderSide(color: Color(0xFFEF4444)),
                             ),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           ),
@@ -340,13 +340,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                   return Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF8B5CF6).withOpacity(0.08),
-                                      border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.2)),
+                                      color: const Color(0xFFEF4444).withOpacity(0.08),
+                                      border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       check,
-                                      style: GoogleFonts.outfit(fontSize: 9, color: const Color(0xFF8B5CF6), fontWeight: FontWeight.bold),
+                                      style: GoogleFonts.outfit(fontSize: 9, color: const Color(0xFFEF4444), fontWeight: FontWeight.bold),
                                     ),
                                   );
                                 }).toList(),
@@ -394,7 +394,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             height: 48,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF8B5CF6), Color(0xFF4FACFE)],
+                                colors: [Color(0xFFEF4444), Color(0xFFFF6B6B)],
                               ),
                               borderRadius: BorderRadius.circular(10),
                             ),

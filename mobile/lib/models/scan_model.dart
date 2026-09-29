@@ -27,9 +27,15 @@ class ScanHistoryItem {
       riskScore: json['risk_score'] ?? 0,
       riskLevel: json['risk_level'] ?? 'SAFE',
       detailsJson: json['details_json'] ?? '{}',
-      timestamp: json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'])
-          : DateTime.now(),
+      timestamp: () {
+        final rawTs = json['timestamp'];
+        if (rawTs == null) return DateTime.now();
+        String str = rawTs.toString();
+        if (!str.endsWith('Z') && !str.contains('+')) {
+          str += 'Z';
+        }
+        return DateTime.tryParse(str)?.toLocal() ?? DateTime.now();
+      }(),
     );
   }
 

@@ -10,6 +10,7 @@ import 'screens/scanner_screen.dart';
 import 'screens/reporter_screen.dart';
 import 'screens/training_screen.dart';
 
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -29,13 +30,13 @@ class AegisApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        primaryColor: const Color(0xFF8B5CF6),
-        scaffoldBackgroundColor: const Color(0xFF06030F),
+        primaryColor: const Color(0xFFEF4444),
+        scaffoldBackgroundColor: const Color(0xFF000000),
         textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF8B5CF6),
-          secondary: Color(0xFFEC4899),
-          surface: Color(0xFF120828),
+          primary: Color(0xFFEF4444),
+          secondary: Color(0xFFDC2626),
+          surface: Color(0xFF1A0000),
         ),
       ),
       home: const MainNavigationShell(),
@@ -116,7 +117,7 @@ class ConsoleLayoutShell extends StatelessWidget {
   Widget _buildGlassyBottomNavBar(BuildContext context, AppState appState) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withOpacity(0.8),
+        color: const Color(0xFF1A0000).withOpacity(0.8),
         border: Border(
           top: BorderSide(
             color: Colors.white.withOpacity(0.06),
@@ -128,7 +129,7 @@ class ConsoleLayoutShell extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -146,6 +147,7 @@ class ConsoleLayoutShell extends StatelessWidget {
                     label: 'Scanner',
                     icon: Icons.security_rounded,
                   ),
+
                   _buildNavItem(
                     context: context,
                     appState: appState,
@@ -177,7 +179,7 @@ class ConsoleLayoutShell extends StatelessWidget {
     required IconData icon,
   }) {
     final bool isActive = appState.activeTab == tabName;
-    final Color color = isActive ? const Color(0xFF8B5CF6) : const Color(0xFF64748B);
+    final Color color = isActive ? const Color(0xFFEF4444) : const Color(0xFF64748B);
 
     return InkWell(
       onTap: () {

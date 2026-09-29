@@ -62,19 +62,19 @@ class _ReporterScreenState extends State<ReporterScreen> {
     final appState = Provider.of<AppState>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF06030F),
+      backgroundColor: const Color(0xFF000000),
       body: Stack(
         children: [
           // Background Glow Orbs
           Positioned(
             top: -100,
             right: -100,
-            child: _buildGlowOrb(const Color(0xFF8B5CF6), 280),
+            child: _buildGlowOrb(const Color(0xFFEF4444), 280),
           ),
           Positioned(
             bottom: -80,
             left: -80,
-            child: _buildGlowOrb(const Color(0xFFEC4899), 250),
+            child: _buildGlowOrb(const Color(0xFFDC2626), 250),
           ),
 
           SafeArea(
@@ -90,7 +90,7 @@ class _ReporterScreenState extends State<ReporterScreen> {
                     style: GoogleFonts.outfit(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF8B5CF6),
+                      color: const Color(0xFFEF4444),
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -173,7 +173,7 @@ class _ReporterScreenState extends State<ReporterScreen> {
                               height: 48,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF8B5CF6), Color(0xFF4FACFE)],
+                                  colors: [Color(0xFFEF4444), Color(0xFFFF6B6B)],
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -252,7 +252,7 @@ class _ReporterScreenState extends State<ReporterScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF120828).withOpacity(0.55),
+            color: const Color(0xFF1A0000).withOpacity(0.55),
             border: Border.all(color: Colors.white.withOpacity(0.06)),
             borderRadius: BorderRadius.circular(16),
           ),
@@ -274,9 +274,9 @@ class _ReporterScreenState extends State<ReporterScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedScamType,
-          dropdownColor: const Color(0xFF120828),
+          dropdownColor: const Color(0xFF1A0000),
           style: GoogleFonts.outfit(color: Colors.white, fontSize: 14),
-          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF8B5CF6)),
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFEF4444)),
           isExpanded: true,
           items: const [
             DropdownMenuItem(value: 'phishing', child: Text('Phishing (Email/Web)')),
@@ -312,22 +312,22 @@ class _ReporterScreenState extends State<ReporterScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: Color(0xFF8B5CF6)),
+        borderSide: const BorderSide(color: Color(0xFFEF4444)),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
   Widget _buildReportFeedCard(ScamReport report) {
-    Color badgeColor = const Color(0xFF8B5CF6);
-    if (report.scamType == 'smishing') badgeColor = const Color(0xFFEC4899);
+    Color badgeColor = const Color(0xFFEF4444);
+    if (report.scamType == 'smishing') badgeColor = const Color(0xFFDC2626);
     if (report.scamType == 'vishing') badgeColor = const Color(0xFFF59E0B);
     if (report.scamType == 'other') badgeColor = const Color(0xFF64748B);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withOpacity(0.5),
+        color: const Color(0xFF1A0000).withOpacity(0.5),
         border: Border.all(color: Colors.white.withOpacity(0.04)),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -405,7 +405,7 @@ class _ReporterScreenState extends State<ReporterScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withOpacity(0.4),
+        color: const Color(0xFF1A0000).withOpacity(0.4),
         border: Border.all(color: Colors.white.withOpacity(0.04)),
         borderRadius: BorderRadius.circular(12),
       ),

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import MLDashboard from './MLDashboard';
 
 const LOADING_STEPS = [
   "Initializing lexical verification layer...",
@@ -10,13 +11,7 @@ const LOADING_STEPS = [
 ];
 
 export default function Scanner({ onScanComplete }) {
-  const [activeTab, setActiveTab] = useState('url'); // 'url' or 'text'
-  const [inputContent, setInputContent] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [loadingStep, setLoadingStep] = useState(0);
-  const [result, setResult] = useState(null);
-
-  // Cycle through loading steps to look hyper-professional
+  const [activeTab, setActiveTab] = useState('url'); // 'url', 'text', 'screenshot', 'email', 'spam'
   useEffect(() => {
     let interval;
     if (loading) {
@@ -132,201 +127,41 @@ export default function Scanner({ onScanComplete }) {
           <div className="scanner-tabs">
             <button
               className={`scan-tab ${activeTab === 'url' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('url'); setInputContent(''); setResult(null); }}
-              disabled={loading}
+              onClick={() => setActiveTab('url')}
             >
-              🌐 URL Threat Scan
+              URL Scan
             </button>
             <button
               className={`scan-tab ${activeTab === 'text' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('text'); setInputContent(''); setResult(null); }}
-              disabled={loading}
+              onClick={() => setActiveTab('text')}
             >
-              ✉️ Email & SMS Message Analyzer
+              Text Scan
+            </button>
+            <button
+              className={`scan-tab ${activeTab === 'screenshot' ? 'active' : ''}`}
+              onClick={() => setActiveTab('screenshot')}
+            >
+              Screenshot
+            </button>
+            <button
+              className={`scan-tab ${activeTab === 'email' ? 'active' : ''}`}
+              onClick={() => setActiveTab('email')}
+            >
+              Email Header
+            </button>
+            <button
+              className={`scan-tab ${activeTab === 'spam' ? 'active' : ''}`}
+              onClick={() => setActiveTab('spam')}
+            >
+              Spam Lookup
             </button>
           </div>
 
-          {/* Scanner Form */}
-          <form onSubmit={handleScan} className="scanner-input-area">
-            <div className="scanner-input-wrapper">
-              {activeTab === 'url' ? (
-                <input
-                  type="text"
-                  className="scanner-text-input"
-                  placeholder="Paste suspicious website URL here (e.g., http://login-verify-chase.net)..."
-                  value={inputContent}
-                  onChange={(e) => setInputContent(e.target.value)}
-                  disabled={loading}
-                  required
-                />
-              ) : (
-                <textarea
-                  className="scanner-text-input"
-                  placeholder="Paste email headers, full text body, or suspicious SMS message here..."
-                  value={inputContent}
-                  onChange={(e) => setInputContent(e.target.value)}
-                  disabled={loading}
-                  required
-                />
-              )}
-            </div>
-
-            <button type="submit" className="scan-button" disabled={loading || !inputContent.trim()}>
-              {loading ? (
-                <>
-                  <div className="spinner"></div>
-                  <span>Analyzing Threat Vector...</span>
-                </>
-              ) : (
-                <>
-                  <span>⚡</span>
-                  <span>Analyze Threat Vector</span>
-                </>
-              )}
-            </button>
-          </form>
+          <div style={{ marginTop: '20px' }}>
+            <MLDashboard key={activeTab} embedded={true} />
+          </div>
         </div>
       </div>
-
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="glass-card scan-progress-container glow-cyan">
-          <div className="scanning-radar"></div>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: '#00f2fe' }}>
-            {LOADING_STEPS[loadingStep]}
-          </p>
-        </div>
-      )}
-
-      {/* Analysis Results View */}
-      {result && verdict && (
-        <div className="glass-card results-layout">
-          {/* Circular Threat Gauge */}
-          <div className="gauge-container">
-            <div className="circular-progress" style={getGaugeStyles(result.risk_score, result.risk_level)}>
-              <div className="gauge-text">
-                <span className="gauge-percentage" style={{ color: verdict.color }}>
-                  {result.risk_score}%
-                </span>
-                <div className="gauge-label">Risk Rating</div>
-              </div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <span className={`status-badge ${result.risk_level.toLowerCase()}`} style={{ fontSize: '14px' }}>
-                {result.risk_level}
-              </span>
-            </div>
-          </div>
-
-          {/* Audit Checklist & Recommendations */}
-          <div className="results-content">
-            <div className="verdict-header">
-              <h2 style={{ color: verdict.color, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {result.risk_level === 'SAFE' ? '✔️' : result.risk_level === 'SUSPICIOUS' ? '⚠️' : '🚨'} {verdict.title}
-              </h2>
-              <p style={{ color: 'var(--text-sub)', marginTop: '8px', fontSize: '14px' }}>
-                {verdict.desc}
-              </p>
-            </div>
-
-            {/* Check results list */}
-            <div>
-              <h4 style={{ marginBottom: '12px', fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                System Audit Checks
-              </h4>
-              <div className="checks-list">
-                {parsedDetails && parsedDetails.checks && Object.entries(parsedDetails.checks).map(([checkKey, isFlagged]) => {
-                  // Format checks labels
-                  const label = checkKey
-                    .replace(/_/g, ' ')
-                    .replace(/\b\w/g, (c) => c.toUpperCase());
-                  
-                  // The check passes if it is NOT flagged
-                  const checkPassed = !isFlagged;
-
-                  return (
-                    <div key={checkKey} className={`check-item ${checkPassed ? 'passed' : 'flagged'}`}>
-                      <span className="check-icon">{checkPassed ? '✅' : '❌'}</span>
-                      <span className="check-text" style={{ color: checkPassed ? 'var(--text-main)' : 'var(--color-dangerous)' }}>
-                        {label} - {checkPassed ? 'Passed' : 'Flagged Risk Factor'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* AI Reasoning / Explanations */}
-            {parsedDetails && parsedDetails.reasons && parsedDetails.reasons.length > 0 && (
-              <div>
-                <h4 style={{ marginBottom: '12px', fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  Reasoning Breakdown
-                </h4>
-                <ul style={{ paddingLeft: '20px', color: 'var(--text-sub)', fontSize: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {parsedDetails.reasons.map((reason, index) => (
-                    <li key={index}>{reason}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Geo-IP Network Threat Origin Logs */}
-            {parsedDetails && parsedDetails.geo_ip && (
-              <div>
-                <h4 style={{ marginBottom: '12px', fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  Geo-IP Network Origin Logs
-                </h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: 'rgba(255,255,255,0.015)', border: '1px solid var(--border-glass)', padding: '16px', borderRadius: '12px', fontSize: '13px' }}>
-                  <div><span style={{color: 'var(--text-muted)'}}>IP Address:</span> <strong style={{fontFamily: 'var(--font-mono)'}}>{parsedDetails.geo_ip.ip}</strong></div>
-                  <div><span style={{color: 'var(--text-muted)'}}>Hosting Provider (ISP):</span> <strong>{parsedDetails.geo_ip.isp}</strong></div>
-                  <div><span style={{color: 'var(--text-muted)'}}>Geographic Country:</span> <strong>{parsedDetails.geo_ip.country}</strong></div>
-                  <div><span style={{color: 'var(--text-muted)'}}>Domain Registration Age:</span> <strong>{parsedDetails.geo_ip.domain_age}</strong></div>
-                </div>
-              </div>
-            )}
-
-            {/* Classification Decision Weights */}
-            {parsedDetails && parsedDetails.weights && (
-              <div>
-                <h4 style={{ marginBottom: '12px', fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                  Classification Feature Weights
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: 'rgba(255,255,255,0.015)', border: '1px solid var(--border-glass)', padding: '16px', borderRadius: '12px' }}>
-                  {Object.entries(parsedDetails.weights).map(([wKey, wVal]) => {
-                    const label = wKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                    return (
-                      <div key={wKey}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
-                          <span>{label}</span>
-                          <span style={{color: '#00f2fe', fontWeight: '700'}}>{wVal}</span>
-                        </div>
-                        <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-                          <div style={{ width: wVal, height: '100%', background: 'var(--primary-glow)' }}></div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Mitigation Tips */}
-            <div>
-              <h4 style={{ marginBottom: '12px', fontSize: '14px', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                Safety Recommendations
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {verdict.tips.map((tip, index) => (
-                  <div key={index} style={{ background: 'rgba(255,255,255,0.02)', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--border-glass)', fontSize: '14px', color: 'var(--text-sub)', display: 'flex', gap: '8px' }}>
-                    <span>💡</span>
-                    <span>{tip}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

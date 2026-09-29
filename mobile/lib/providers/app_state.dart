@@ -29,17 +29,17 @@ class AppState extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // Caches
-  int _totalScans = 1248;
+  // Caches — start from zero, values build up as user scans
+  int _totalScans = 0;
   int get totalScans => _totalScans;
 
-  int _totalReports = 347;
+  int _totalReports = 0;
   int get totalReports => _totalReports;
 
-  Map<String, int> _scansBreakdown = {'safe': 856, 'suspicious': 247, 'dangerous': 145};
+  Map<String, int> _scansBreakdown = {'safe': 0, 'suspicious': 0, 'dangerous': 0};
   Map<String, int> get scansBreakdown => _scansBreakdown;
 
-  Map<String, int> _reportsByType = {'phishing': 186, 'smishing': 92, 'vishing': 41, 'other': 28};
+  Map<String, int> _reportsByType = {'phishing': 0, 'smishing': 0, 'vishing': 0, 'other': 0};
   Map<String, int> get reportsByType => _reportsByType;
 
   List<ScanHistoryItem> _recentScans = [];
@@ -51,78 +51,15 @@ class AppState extends ChangeNotifier {
   List<LeaderboardScore> _leaderboard = [];
   List<LeaderboardScore> get leaderboard => _leaderboard;
 
-  // Mock telemetry fallback data
+  // Reset analytics to zero (offline/demo mode)
   void _loadMockAnalytics() {
-    _totalScans = 1248;
-    _totalReports = 347;
-    _scansBreakdown = {'safe': 856, 'suspicious': 247, 'dangerous': 145};
-    _reportsByType = {'phishing': 186, 'smishing': 92, 'vishing': 41, 'other': 28};
-
-    _recentScans = [
-      ScanHistoryItem(
-        id: 1,
-        inputType: 'url',
-        inputContent: 'http://secure-login-netflix.club/billing',
-        riskScore: 85,
-        riskLevel: 'DANGEROUS',
-        detailsJson: jsonEncode({
-          'reasons': ['Uses suspicious TLD (.club)', 'Contains brand keyword (netflix)', 'Not using HTTPS'],
-          'geo_ip': {'ip': '185.220.101.42', 'country': 'Russia (RU)', 'isp': 'Mevspace Servers SAS', 'domain_age': '5 days ago'},
-          'weights': {'lexical_features': '40%', 'heuristic_scoring': '40%', 'protocol_security': '20%'}
-        }),
-        timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
-      ),
-      ScanHistoryItem(
-        id: 2,
-        inputType: 'text',
-        inputContent: 'URGENT: Chase Bank detected a login breach. Confirm details within 24 hours to reactivate.',
-        riskScore: 70,
-        riskLevel: 'DANGEROUS',
-        detailsJson: jsonEncode({
-          'reasons': ['Panic urgency phrases matched', 'Urgent request for account credentials'],
-          'weights': {'urgency_lexicon': '50%', 'financial_hooks': '0%', 'credential_harvesting': '50%'}
-        }),
-        timestamp: DateTime.now().subtract(const Duration(minutes: 45)),
-      ),
-      ScanHistoryItem(
-        id: 3,
-        inputType: 'url',
-        inputContent: 'https://myaccount.google.com/security',
-        riskScore: 0,
-        riskLevel: 'SAFE',
-        detailsJson: jsonEncode({
-          'reasons': ['The domain belongs to a highly trusted public whitelist.'],
-          'geo_ip': {'ip': '142.250.195.46', 'country': 'United States (US)', 'isp': 'Google LLC', 'domain_age': '26 years'},
-          'weights': {'lexical_features': '0%', 'heuristic_scoring': '0%', 'dns_reputation': '100%'}
-        }),
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-    ];
-
-    _recentReports = [
-      ScamReport(
-        id: 1,
-        scamType: 'phishing',
-        indicator: 'login-verify-chase-bank.xyz',
-        description: 'Fake credit card login link sent via email.',
-        reporterIp: '192.168.1.101',
-        timestamp: DateTime.now().subtract(const Duration(hours: 3)),
-      ),
-      ScamReport(
-        id: 2,
-        scamType: 'smishing',
-        indicator: '+1 (833) 244-9981',
-        description: 'USPS package scam SMS.',
-        reporterIp: '192.168.1.144',
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-      ),
-    ];
-
-    _leaderboard = [
-      LeaderboardScore(id: 1, username: 'AliceSec', score: 5, total: 5, timestamp: DateTime.now().subtract(const Duration(hours: 2))),
-      LeaderboardScore(id: 2, username: 'BobScout', score: 4, total: 5, timestamp: DateTime.now().subtract(const Duration(hours: 4))),
-      LeaderboardScore(id: 3, username: 'CharlieSafe', score: 3, total: 5, timestamp: DateTime.now().subtract(const Duration(hours: 12))),
-    ];
+    _totalScans = 0;
+    _totalReports = 0;
+    _scansBreakdown = {'safe': 0, 'suspicious': 0, 'dangerous': 0};
+    _reportsByType = {'phishing': 0, 'smishing': 0, 'vishing': 0, 'other': 0};
+    _recentScans = [];
+    _recentReports = [];
+    _leaderboard = [];
   }
 
   // Load telemetry

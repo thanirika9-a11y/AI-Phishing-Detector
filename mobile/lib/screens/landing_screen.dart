@@ -10,19 +10,19 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF06030F),
+      backgroundColor: const Color(0xFF000000),
       body: Stack(
         children: [
           // Ambient Background Orbs
           Positioned(
             top: -100,
             left: -100,
-            child: _buildGlowOrb(const Color(0xFF8B5CF6), 300),
+            child: _buildGlowOrb(const Color(0xFFEF4444), 300),
           ),
           Positioned(
             bottom: -80,
             right: -80,
-            child: _buildGlowOrb(const Color(0xFFEC4899), 250),
+            child: _buildGlowOrb(const Color(0xFFDC2626), 250),
           ),
           Positioned(
             top: MediaQuery.of(context).size.height * 0.4,
@@ -49,7 +49,7 @@ class LandingScreen extends StatelessWidget {
                             style: GoogleFonts.outfit(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF8B5CF6),
+                              color: const Color(0xFFEF4444),
                             ),
                           ),
                         ],
@@ -84,8 +84,8 @@ class LandingScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF8B5CF6).withOpacity(0.06),
-                            border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.2)),
+                            color: const Color(0xFFEF4444).withOpacity(0.06),
+                            border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Row(
@@ -96,7 +96,7 @@ class LandingScreen extends StatelessWidget {
                               Text(
                                 'Powered by Hybrid AI + Lexical Heuristics',
                                 style: GoogleFonts.outfit(
-                                  color: const Color(0xFF8B5CF6),
+                                  color: const Color(0xFFEF4444),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -147,12 +147,12 @@ class LandingScreen extends StatelessWidget {
                               child: Container(
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF8B5CF6), Color(0xFF4FACFE)],
+                                    colors: [Color(0xFFEF4444), Color(0xFFFF6B6B)],
                                   ),
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF8B5CF6).withOpacity(0.25),
+                                      color: const Color(0xFFEF4444).withOpacity(0.25),
                                       blurRadius: 20,
                                       offset: const Offset(0, 4),
                                     ),
@@ -250,7 +250,7 @@ class LandingScreen extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withOpacity(0.6),
+        color: const Color(0xFF1A0000).withOpacity(0.6),
         border: Border.all(color: Colors.white.withOpacity(0.06)),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -266,7 +266,7 @@ class LandingScreen extends StatelessWidget {
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF8B5CF6),
+                    color: const Color(0xFFEF4444),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -293,7 +293,7 @@ class LandingScreen extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF120828).withOpacity(0.55),
+        color: const Color(0xFF1A0000).withOpacity(0.55),
         border: Border.all(color: Colors.white.withOpacity(0.06)),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -321,8 +321,8 @@ class LandingScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8B5CF6).withOpacity(0.08),
-                        border: Border.all(color: const Color(0xFF8B5CF6).withOpacity(0.2)),
+                        color: const Color(0xFFEF4444).withOpacity(0.08),
+                        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -330,7 +330,7 @@ class LandingScreen extends StatelessWidget {
                         style: GoogleFonts.outfit(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF8B5CF6),
+                          color: const Color(0xFFEF4444),
                         ),
                       ),
                     ),

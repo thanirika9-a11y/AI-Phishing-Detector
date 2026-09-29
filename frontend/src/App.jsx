@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import Scanner from './components/Scanner';
 import Reporter from './components/Reporter';
 import Training from './components/Training';
+import MLDashboard from './components/MLDashboard';
 
 // Fallback simulated analytics metrics
 const DEFAULT_MOCK_ANALYTICS = {
@@ -50,8 +51,8 @@ const DEFAULT_MOCK_ANALYTICS = {
     }
   ],
   recent_reports: [
-    { id: 1, scam_type: "phishing", indicator: "login-verify-chase-bank.xyz", description: "Fake credit card login link sent via email.", reporter_ip: "192.168.1.101", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString() },
-    { id: 2, scam_type: "smishing", indicator: "+1 (833) 244-9981", description: "USPS package scam SMS.", reporter_ip: "192.168.1.144", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString() }
+    { id: 1, scam_type: 'phishing', indicator: 'login-verify-chase-bank.xyz', description: 'Fake credit card login link sent via email.', timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString() },
+    { id: 2, scam_type: 'smishing', indicator: '+1 (833) 244-9981', description: 'USPS package scam SMS.', timestamp: new Date(Date.now() - 1000 * 60 * 360).toISOString() }
   ]
 };
 
@@ -109,8 +110,9 @@ export default function App() {
     switch (activeTab) {
       case 'dashboard': return <Dashboard analytics={analytics} loading={loading} />;
       case 'scanner': return <Scanner onScanComplete={fetchAnalytics} />;
+      case 'mllab': return <Dashboard analytics={analytics} loading={loading} />; // Placeholder
       case 'reports': return <Reporter reports={analytics ? analytics.recent_reports : []} onReportSubmitted={fetchAnalytics} />;
-      case 'training': return <Training />;
+      case 'academy': return <Training />;
       default: return <Dashboard analytics={analytics} loading={loading} />;
     }
   };
@@ -124,16 +126,18 @@ export default function App() {
 
   const NAV_ITEMS = [
     { key: 'dashboard', icon: '📊', label: 'Dashboard', desc: 'Overview & Analytics' },
-    { key: 'scanner', icon: '⚡', label: 'Threat Scanner', desc: 'URL & Message Analysis' },
-    { key: 'reports', icon: '🚨', label: 'Report Center', desc: 'Community Threat Intel' },
-    { key: 'training', icon: '🧠', label: 'Training Lab', desc: 'Phishing Simulation' },
+    { key: 'scanner', icon: '⚡', label: 'Scanner', desc: 'Threat Analysis' },
+    { key: 'mllab', icon: '🤖', label: 'ML Lab', desc: 'Custom Models' },
+    { key: 'reports', icon: '🚨', label: 'Reporter', desc: 'Community Intel' },
+    { key: 'academy', icon: '🎓', label: 'Academy', desc: 'Training Labs' },
   ];
 
   const PAGE_TITLES = {
     dashboard: { title: 'Threat Intelligence Dashboard', sub: 'Real-time security analytics, scan metrics, and community threat activity logs.' },
-    scanner: { title: 'AI-Powered Threat Scanner', sub: 'Analyze suspicious URLs, emails, and SMS messages with AI-driven heuristic classifiers.' },
+    scanner: { title: 'Threat Scanner Lab', sub: 'Upload CSV datasets across various categories for ML analysis and graph generation.' },
+    mllab: { title: 'Machine Learning Lab', sub: 'Advanced model configuration and historical training runs.' },
     reports: { title: 'Community Threat Reports', sub: 'Crowdsourced threat intelligence — report and track active phishing campaigns.' },
-    training: { title: 'Phishing Awareness Lab', sub: 'Interactive simulation exercises to sharpen your threat recognition skills.' },
+    academy: { title: 'Academy', sub: 'Interactive simulation exercises to sharpen your threat recognition skills.' },
   };
 
   return (
