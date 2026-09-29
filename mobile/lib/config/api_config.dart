@@ -2,13 +2,34 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class ApiConfig {
+  // Configurable deployed backend URL
+  static String? customBackendUrl;
+
   static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:8000';
+    // 1. Check dart-define environment variable passed at build time
+    const envUrl = String.fromEnvironment('BACKEND_URL');
+    if (envUrl.isNotEmpty) {
+      return envUrl;
     }
+
+    // 2. Runtime override if set
+    if (customBackendUrl != null && customBackendUrl!.isNotEmpty) {
+      return customBackendUrl!;
+    }
+
+    // 3. Web check
+    if (kIsWeb) {
+      final host = Uri.base.host;
+      if (host == 'localhost' || host == '127.0.0.1') {
+        return 'http://localhost:8000';
+      }
+      // Production Web (Vercel): Defaults to Render deployed backend URL
+      // If environment variable is set in Vercel or Render, it will use that.
+      return 'https://aegis-phishing-backend.onrender.com';
+    }
+
     try {
       if (Platform.isAndroid) {
-        // Android emulator points to 10.0.2.2 for the host machine loopback
         return 'http://10.0.2.2:8000';
       }
     } catch (_) {}
