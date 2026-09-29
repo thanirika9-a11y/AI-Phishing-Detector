@@ -1,16 +1,35 @@
-# AI Phishing Detector
+# 🛡️ Aegis AI Phishing Detector
 
-## Run Backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+An AI-powered phishing and scam detection system designed to identify
+malicious URLs, messages, emails and screenshots.
 
-## Run Frontend
-cd frontend
-npm install
-npm run dev
+## 🚀 Live Demo
 
-## Run Mobile
-cd mobile
-flutter pub get
-flutter run
+👉 [Aegis AI Phishing Detector](https://aegis-phishing-detector-six.vercel.app/)
+
+## ✨ Features
+
+- 🔗 URL Phishing Detection
+- 📧 Email Detection
+- 💬 Text/Message Scam Detection
+- 🖼️ Screenshot Analysis
+- 🤖 Machine Learning Based Detection
+- 📊 Security Analytics Dashboard
+- 📱 Flutter Mobile Application
+- 🌐 React Web Application
+- ⚡ FastAPI Backend
+
+## 🛠️ Technologies
+
+- Python
+- FastAPI
+- Scikit-learn
+- React
+- Vite
+- Flutter
+- Firebase
+- Vercel
+
+## 🌐 Live Project
+
+[Aegis AI Phishing Detector](https://aegis-phishing-detector-six.vercel.app/)
