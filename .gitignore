@@ -10,3 +10,22 @@ build/
 .dart_tool/
 .vscode/
 .idea/
+
+# Python virtual environment
+backend/venv/
+venv/
+
+# Trained model pickles (generated at runtime)
+*.pkl
+
+# Large dataset files
+backend/datasets/
+sample_phishing_dataset.csv
+
+# Backend junk
+backend/-F
+
+# Flutter platform directories (auto-generated)
+mobile/linux/
+mobile/macos/
+mobile/windows/
